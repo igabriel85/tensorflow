@@ -1,4 +1,4 @@
-# Copyright 2015 Google Inc. All Rights Reserved.
+# Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -64,6 +64,20 @@ class SparseMatMulTest(tf.test.TestCase):
       for y_dtype in (tf.float32, tf.bfloat16):
         self._testCpuMatmul(x, y, x_dtype=x_dtype, y_dtype=y_dtype)
 
+  def testZeroDim(self):
+    x = np.ones((4, 0)).astype(np.float32)
+    y = np.ones((0, 3)).astype(np.float32)
+    for x_dtype in (tf.float32, tf.bfloat16):
+      for y_dtype in (tf.float32, tf.bfloat16):
+        self._testCpuMatmul(x, y, x_dtype=x_dtype, y_dtype=y_dtype)
+
+  def testEmpty(self):
+    x = np.ones((0, 0)).astype(np.float32)
+    y = np.ones((0, 0)).astype(np.float32)
+    for x_dtype in (tf.float32, tf.bfloat16):
+      for y_dtype in (tf.float32, tf.bfloat16):
+        self._testCpuMatmul(x, y, x_dtype=x_dtype, y_dtype=y_dtype)
+
   # Tests setting one dimension to be a high value.
   def testLarge(self):
     r1 = np.random.randint(6000, 20000)
@@ -80,18 +94,17 @@ class SparseMatMulTest(tf.test.TestCase):
 
   # Tests random sized matrices.
   def testRandom(self):
-    for _ in range(10):
-      for tr_a in [True, False]:
-        for tr_b in [True, False]:
-          for sp_a in [True, False]:
-            for sp_b in [True, False]:
-              for x_dtype in (tf.float32, tf.bfloat16):
-                for y_dtype in (tf.float32, tf.bfloat16):
-                  n, k, m = np.random.randint(1, 100, size=3)
-                  x = RandMatrix(n, k, tr_a)
-                  y = RandMatrix(k, m, tr_b)
-                  self._testCpuMatmul(x, y, tr_a, tr_b, sp_a, sp_b,
-                                      x_dtype=x_dtype, y_dtype=y_dtype)
+    for tr_a in [True, False]:
+      for tr_b in [True, False]:
+        for sp_a in [True, False]:
+          for sp_b in [True, False]:
+            for x_dtype in (tf.float32, tf.bfloat16):
+              for y_dtype in (tf.float32, tf.bfloat16):
+                n, k, m = np.random.randint(1, 100, size=3)
+                x = RandMatrix(n, k, tr_a)
+                y = RandMatrix(k, m, tr_b)
+                self._testCpuMatmul(x, y, tr_a, tr_b, sp_a, sp_b,
+                                    x_dtype=x_dtype, y_dtype=y_dtype)
 
 
 class MatMulGradientTest(tf.test.TestCase):
